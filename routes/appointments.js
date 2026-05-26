@@ -21,8 +21,8 @@ appointmentsRouter.get('/booked-slots', async (req, res) => {
     }
 });
 
-// ─── AUTHENTICATED PATIENT BOOKING ───
-appointmentsRouter.post('/public-book', authenticate, async (req, res) => {
+// ─── PUBLIC PATIENT BOOKING ───
+appointmentsRouter.post('/public-book', async (req, res) => {
     const { patientName, phone, email, service, date, time, notes } = req.body;
     if (!patientName || !phone || !date || !time) return res.status(400).json({ message: 'Name, phone, date, and time are required.' });
 
@@ -34,11 +34,8 @@ appointmentsRouter.post('/public-book', authenticate, async (req, res) => {
     if (existing) return res.status(400).json({ message: 'This time slot is already booked. Please choose another.' });
 
     try {
-        // Use the authenticated user directly
-        const patient = req.user;
-
         const newAppointment = await Appointment.create({
-            patientId: patient._id, patientName: patientName || patient.name, patientPhone: phone || patient.phone || '', patientEmail: email || patient.email || '',
+            patientName, patientPhone: phone, patientEmail: email || '',
             date, time, service: service || 'Consultation', status: 'scheduled', notes: notes || '', source: 'website'
         });
 
