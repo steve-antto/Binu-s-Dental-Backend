@@ -2,11 +2,13 @@ import admin from '../firebase/firebaseAdmin.js';
 import User from '../models/user.js';
 
 export const authenticate = async (req, res, next) => {
-    const token = req.headers.authorization?.split('Bearer ')[1];
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
-        return res.status(401).json({ message: 'Unauthorized: No token provided' });
+    if (!authHeader?.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "No token provided" });
     }
+
+    const token = authHeader.split(" ")[1];
 
     // --- DEVELOPMENT BYPASS ---
     // If we are in dev mode and the token is exactly "test-admin-token", skip Firebase
