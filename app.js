@@ -26,7 +26,7 @@ const app = express();
 app.use(cors()); // Allows your frontend app to communicate with this API
 app.use(express.json()); // Essential for parsing incoming JSON bodies (req.body)
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads')); // Serve uploaded scans & reports
+
 
 app.use(`/api/v1/auth`, authRouter);
 app.use(`/api/v1/admin`, adminRouter);

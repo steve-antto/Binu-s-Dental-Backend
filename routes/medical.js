@@ -16,7 +16,7 @@ medicalRouter.use(authenticate);
 // ─── Admin: Upload scan file ───
 medicalRouter.post('/appointments/:id/upload-scan', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = null;
     const appt = await Appointment.findByIdAndUpdate(req.params.id,
         { $push: { scans: { filename: req.file.originalname, url: fileUrl } } }, { returnDocument: 'after' });
     res.json({ success: true, appointment: appt });
@@ -25,7 +25,7 @@ medicalRouter.post('/appointments/:id/upload-scan', requireAdmin, upload.single(
 // ─── Admin: Upload report file ───
 medicalRouter.post('/appointments/:id/upload-report', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = null;
     const appt = await Appointment.findByIdAndUpdate(req.params.id,
         { $push: { reports: { filename: req.file.originalname, url: fileUrl } } }, { returnDocument: 'after' });
     res.json({ success: true, appointment: appt });
@@ -34,7 +34,7 @@ medicalRouter.post('/appointments/:id/upload-report', requireAdmin, upload.singl
 // ─── Admin: Upload patient photo ───
 medicalRouter.post('/appointments/:id/upload-photo', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = null;
     const caption = req.body.caption || '';
     const appt = await Appointment.findByIdAndUpdate(req.params.id,
         { $push: { photos: { filename: req.file.originalname, url: fileUrl, caption } } }, { returnDocument: 'after' });

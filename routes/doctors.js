@@ -27,7 +27,7 @@ doctorsRouter.delete('/:id', authenticate, requireAdmin, deleteDoctorProfile);
 // Admin: Upload doctor photo
 doctorsRouter.post('/upload-photo', authenticate, requireAdmin, upload.single('file'), (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No photo uploaded' });
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = null;
     res.json({ success: true, url: fileUrl });
 });
 
