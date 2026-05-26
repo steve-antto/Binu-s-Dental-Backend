@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+require("dotenv").config();
 import User from './models/user.js';
 
-dotenv.config();
+
 
 async function makeAdmin() {
   const email = process.argv[2];
