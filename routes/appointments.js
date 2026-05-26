@@ -34,8 +34,15 @@ appointmentsRouter.post('/public-book', async (req, res) => {
     if (existing) return res.status(400).json({ message: 'This time slot is already booked. Please choose another.' });
 
     try {
+        // Try to link booking to an existing user account by email
+        let patientId = null;
+        if (email) {
+            const existingUser = await User.findOne({ email: email.toLowerCase() });
+            if (existingUser) patientId = existingUser._id;
+        }
+
         const newAppointment = await Appointment.create({
-            patientName, patientPhone: phone, patientEmail: email || '',
+            patientId, patientName, patientPhone: phone, patientEmail: email || '',
             date, time, service: service || 'Consultation', status: 'scheduled', notes: notes || '', source: 'website'
         });
 

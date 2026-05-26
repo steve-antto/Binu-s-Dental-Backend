@@ -9,7 +9,7 @@ export const getAppointments = async (req, res) => {
         // Admins/Doctors view the entire clinic schedule; Patients view their own rows
         const query = (req.user.role === 'admin' || req.user.role === 'doctor')
             ? {}
-            : { patientId: req.user._id };
+            : { $or: [{ patientId: req.user._id }, { patientEmail: req.user.email }] };
 
         const list = await Appointment.find(query)
             .populate('patientId', 'name phone email')
