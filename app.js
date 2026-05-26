@@ -23,7 +23,23 @@ import contactRouter from "./routes/contact.js";
 const app = express();
 
 // 1. Global Middleware
-app.use(cors()); // Allows your frontend app to communicate with this API
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://binu-s-dental-frontend.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json()); // Essential for parsing incoming JSON bodies (req.body)
 app.use(express.urlencoded({ extended: true }));
 
