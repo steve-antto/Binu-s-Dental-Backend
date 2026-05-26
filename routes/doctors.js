@@ -1,7 +1,5 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { authenticate } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/adminauth.js';
 import {
@@ -13,27 +11,9 @@ import {
 
 const doctorsRouter = new Router();
 
-// File upload configuration for Doctor Profile Photos
-const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-        cb(null, uniqueName);
-    }
-});
-
+// File upload configuration for Doctor Profile Photos (memory storage for Vercel)
 const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
-    fileFilter: (req, file, cb) => {
-        const allowed = /jpeg|jpg|png|webp|gif/;
-        const ext = allowed.test(path.extname(file.originalname).toLowerCase());
-        const mime = allowed.test(file.mimetype);
-        cb(null, ext || mime);
-    }
+    storage: multer.memoryStorage(),
 });
 
 // GET /api/v1/doctors - List all doctors (PUBLIC - accessible by everyone)
