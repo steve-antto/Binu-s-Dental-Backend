@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from './models/user.js';
 
-dotenv.config({ path: '.env.development.local' });
+dotenv.config();
 
 async function makeAdmin() {
   const email = process.argv[2];
