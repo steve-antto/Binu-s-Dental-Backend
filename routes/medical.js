@@ -111,12 +111,6 @@ medicalRouter.delete('/appointments/:id/files', requireAdmin, async (req, res) =
             { returnDocument: 'after' }
         );
         if (!appt) return res.status(404).json({ message: 'Appointment not found' });
-        if (url.startsWith('/uploads/')) {
-            const filePath = path.join(process.cwd(), url);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-        }
         res.json({ success: true, appointment: appt });
     } catch (err) {
         res.status(500).json({ message: 'Error deleting file' });
