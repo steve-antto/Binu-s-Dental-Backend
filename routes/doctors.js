@@ -23,11 +23,11 @@ const uploadToCloudinary = (fileBuffer) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: "doctors",
-        resource_type: "auto",
+        resource_type: "image",
       },
       (error, result) => {
-        if (result) resolve(result);
-        else reject(error);
+        if (error) reject(error);
+        else resolve(result);
       }
     );
 
