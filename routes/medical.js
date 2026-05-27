@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import streamifier from 'streamifier';
 import cloudinary from '../config/cloudinary.js';
 import { authenticate } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/adminauth.js';
@@ -8,47 +8,74 @@ import Appointment from '../models/appointments.model.js';
 
 const medicalRouter = new Router();
 
-// ─── File Upload Setup (Cloudinary) ───
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'medical_files',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'pdf'],
-  },
+// ─── File Upload Setup (Memory Storage) ───
+const upload = multer({
+    storage: multer.memoryStorage(),
 });
 
-const upload = multer({
-    storage: storage,
-});
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "medical_files",
+        resource_type: "auto",
+      },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
+};
 
 medicalRouter.use(authenticate);
 
 // ─── Admin: Upload scan file ───
 medicalRouter.post('/appointments/:id/upload-scan', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-    const fileUrl = req.file.path;
-    const appt = await Appointment.findByIdAndUpdate(req.params.id,
-        { $push: { scans: { filename: req.file.originalname, url: fileUrl } } }, { returnDocument: 'after' });
-    res.json({ success: true, appointment: appt });
+    try {
+        const result = await uploadToCloudinary(req.file.buffer);
+        const fileUrl = result.secure_url;
+        const appt = await Appointment.findByIdAndUpdate(req.params.id,
+            { $push: { scans: { filename: req.file.originalname, url: fileUrl } } }, { returnDocument: 'after' });
+        res.json({ success: true, appointment: appt });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Upload failed' });
+    }
 });
 
 // ─── Admin: Upload report file ───
 medicalRouter.post('/appointments/:id/upload-report', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-    const fileUrl = req.file.path;
-    const appt = await Appointment.findByIdAndUpdate(req.params.id,
-        { $push: { reports: { filename: req.file.originalname, url: fileUrl } } }, { returnDocument: 'after' });
-    res.json({ success: true, appointment: appt });
+    try {
+        const result = await uploadToCloudinary(req.file.buffer);
+        const fileUrl = result.secure_url;
+        const appt = await Appointment.findByIdAndUpdate(req.params.id,
+            { $push: { reports: { filename: req.file.originalname, url: fileUrl } } }, { returnDocument: 'after' });
+        res.json({ success: true, appointment: appt });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Upload failed' });
+    }
 });
 
 // ─── Admin: Upload patient photo ───
 medicalRouter.post('/appointments/:id/upload-photo', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-    const fileUrl = req.file.path;
-    const caption = req.body.caption || '';
-    const appt = await Appointment.findByIdAndUpdate(req.params.id,
-        { $push: { photos: { filename: req.file.originalname, url: fileUrl, caption } } }, { returnDocument: 'after' });
-    res.json({ success: true, appointment: appt });
+    try {
+        const result = await uploadToCloudinary(req.file.buffer);
+        const fileUrl = result.secure_url;
+        const caption = req.body.caption || '';
+        const appt = await Appointment.findByIdAndUpdate(req.params.id,
+            { $push: { photos: { filename: req.file.originalname, url: fileUrl, caption } } }, { returnDocument: 'after' });
+        res.json({ success: true, appointment: appt });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Upload failed' });
+    }
 });
 
 // ─── Admin: Update prescription ───

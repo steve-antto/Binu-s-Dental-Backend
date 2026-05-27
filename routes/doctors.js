@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import streamifier from 'streamifier';
 import cloudinary from '../config/cloudinary.js';
 import { authenticate } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/adminauth.js';
@@ -14,17 +14,26 @@ import {
 const doctorsRouter = new Router();
 
 // File upload configuration for Doctor Profile Photos
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'doctors',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-  },
+const upload = multer({
+    storage: multer.memoryStorage(),
 });
 
-const upload = multer({
-    storage: storage,
-});
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "doctors",
+        resource_type: "auto",
+      },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
+};
 
 // GET /api/v1/doctors - List all doctors (PUBLIC - accessible by everyone)
 doctorsRouter.get('/', getAllDoctors);
@@ -35,10 +44,15 @@ doctorsRouter.put('/:id', authenticate, requireAdmin, updateDoctorProfile);
 doctorsRouter.delete('/:id', authenticate, requireAdmin, deleteDoctorProfile);
 
 // Admin: Upload doctor photo
-doctorsRouter.post('/upload-photo', authenticate, requireAdmin, upload.single('file'), (req, res) => {
+doctorsRouter.post('/upload-photo', authenticate, requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No photo uploaded' });
-    const fileUrl = req.file.path;
-    res.json({ success: true, url: fileUrl });
+    try {
+        const result = await uploadToCloudinary(req.file.buffer);
+        res.json({ success: true, url: result.secure_url });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Upload failed' });
+    }
 });
 
 export default doctorsRouter;
