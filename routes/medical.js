@@ -13,12 +13,12 @@ const upload = multer({
     storage: multer.memoryStorage(),
 });
 
-const uploadToCloudinary = (fileBuffer, isPdf = false) => {
+const uploadToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: "medical_files",
-        resource_type: isPdf ? "raw" : "image",
+        resource_type: "auto",
       },
       (error, result) => {
         if (error) reject(error);
@@ -36,8 +36,7 @@ medicalRouter.use(authenticate);
 medicalRouter.post('/appointments/:id/upload-scan', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
     try {
-        const isPdf = req.file.mimetype === "application/pdf";
-        const result = await uploadToCloudinary(req.file.buffer, isPdf);
+        const result = await uploadToCloudinary(req.file.buffer);
         const fileUrl = result.secure_url;
         const appt = await Appointment.findByIdAndUpdate(req.params.id,
             { $push: { scans: { filename: req.file.originalname, url: fileUrl } } }, { returnDocument: 'after' });
@@ -52,8 +51,7 @@ medicalRouter.post('/appointments/:id/upload-scan', requireAdmin, upload.single(
 medicalRouter.post('/appointments/:id/upload-report', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
     try {
-        const isPdf = req.file.mimetype === "application/pdf";
-        const result = await uploadToCloudinary(req.file.buffer, isPdf);
+        const result = await uploadToCloudinary(req.file.buffer);
         const fileUrl = result.secure_url;
         const appt = await Appointment.findByIdAndUpdate(req.params.id,
             { $push: { reports: { filename: req.file.originalname, url: fileUrl } } }, { returnDocument: 'after' });
@@ -68,8 +66,7 @@ medicalRouter.post('/appointments/:id/upload-report', requireAdmin, upload.singl
 medicalRouter.post('/appointments/:id/upload-photo', requireAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
     try {
-        const isPdf = req.file.mimetype === "application/pdf";
-        const result = await uploadToCloudinary(req.file.buffer, isPdf);
+        const result = await uploadToCloudinary(req.file.buffer);
         const fileUrl = result.secure_url;
         const caption = req.body.caption || '';
         const appt = await Appointment.findByIdAndUpdate(req.params.id,
@@ -155,6 +152,36 @@ medicalRouter.delete('/appointments/:id/files', requireAdmin, async (req, res) =
     } catch (err) {
         res.status(500).json({ message: 'Error deleting file' });
     }
+});
+
+// ─── Admin: Delete single report by its ID ───
+medicalRouter.delete("/report/:id", authenticate, async (req, res) => {
+  try {
+    const appointment = await Appointment.findOne({
+      "reports._id": req.params.id,
+    });
+
+    if (!appointment) {
+      return res.status(404).json({
+        message: "Report not found",
+      });
+    }
+
+    appointment.reports =
+      appointment.reports.filter(
+        (r) => r._id.toString() !== req.params.id
+      );
+
+    await appointment.save();
+
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Delete failed",
+    });
+  }
 });
 
 export default medicalRouter;
