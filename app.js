@@ -25,7 +25,15 @@ const app = express();
 // 1. Global Middleware
 const allowedOrigins = [
   "http://localhost:5173",
+
+  // Old Vercel frontend
   "https://binu-s-dental-frontend.vercel.app",
+
+  // Custom domain
+  "https://drbinusclinic.com",
+
+  // WWW version
+  "https://www.drbinusclinic.com",
 ];
 
 app.use(
