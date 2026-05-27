@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../config/cloudinary.js';
 import { authenticate } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/adminauth.js';
 import {
@@ -11,9 +13,17 @@ import {
 
 const doctorsRouter = new Router();
 
-// File upload configuration for Doctor Profile Photos (memory storage for Vercel)
+// File upload configuration for Doctor Profile Photos
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'doctors',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+  },
+});
+
 const upload = multer({
-    storage: multer.memoryStorage(),
+    storage: storage,
 });
 
 // GET /api/v1/doctors - List all doctors (PUBLIC - accessible by everyone)
@@ -27,7 +37,7 @@ doctorsRouter.delete('/:id', authenticate, requireAdmin, deleteDoctorProfile);
 // Admin: Upload doctor photo
 doctorsRouter.post('/upload-photo', authenticate, requireAdmin, upload.single('file'), (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No photo uploaded' });
-    const fileUrl = null;
+    const fileUrl = req.file.path;
     res.json({ success: true, url: fileUrl });
 });
 
