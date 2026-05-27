@@ -184,4 +184,34 @@ medicalRouter.delete("/report/:id", authenticate, async (req, res) => {
   }
 });
 
+// ─── Admin: Delete single scan by its ID ───
+medicalRouter.delete("/scan/:id", authenticate, async (req, res) => {
+  try {
+    const appointment = await Appointment.findOne({
+      "scans._id": req.params.id,
+    });
+
+    if (!appointment) {
+      return res.status(404).json({
+        message: "Scan not found",
+      });
+    }
+
+    appointment.scans = appointment.scans.filter(
+      (scan) => scan._id.toString() !== req.params.id
+    );
+
+    await appointment.save();
+
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Delete failed",
+    });
+  }
+});
+
 export default medicalRouter;
