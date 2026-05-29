@@ -45,6 +45,16 @@ const appointmentSchema = new mongoose.Schema({
             default: {},
         }
     },
+    treatmentSchedule: {
+        enabled: {
+            type: Boolean,
+            default: false,
+        },
+        startDate: String,
+        endDate: String,
+        recurringTime: String,
+        totalDays: Number,
+    },
     invoiceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
     source: { type: String, enum: ['website', 'admin', 'walk-in'], default: 'admin' }
 }, { timestamps: true });

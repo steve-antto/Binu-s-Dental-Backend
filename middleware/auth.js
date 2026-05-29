@@ -24,17 +24,32 @@ export const authenticate = async (req, res, next) => {
     // --------------------------
 
     try {
-        // 1. Verify token with Firebase
+        // 1. Verify Firebase token
         const decodedToken = await admin.auth().verifyIdToken(token);
 
-        // 2. Find the user in MongoDB
-        const user = await User.findOne({ email: decodedToken.email.toLowerCase() });
+        // 2. Check 20-minute session expiry
+        const loginTime = decodedToken.auth_time * 1000;
+        const currentTime = Date.now();
+        const TWENTY_MINUTES = 20 * 60 * 1000;
 
-        if (!user) {
-            return res.status(401).json({ message: 'Unauthorized: User not found in database' });
+        if (currentTime - loginTime > TWENTY_MINUTES) {
+            return res.status(401).json({
+                message: "Session expired after 20 minutes. Please login again.",
+            });
         }
 
-        // 3. Attach user to the request
+        // 3. Find user in MongoDB
+        const user = await User.findOne({
+            email: decodedToken.email.toLowerCase(),
+        });
+
+        if (!user) {
+            return res.status(401).json({
+                message: "Unauthorized: User not found in database",
+            });
+        }
+
+        // 4. Attach user
         req.user = user;
         next();
     } catch (error) {

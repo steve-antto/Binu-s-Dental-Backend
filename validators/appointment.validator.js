@@ -20,7 +20,10 @@ export const validateCreateAppointment = (req, res, next) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (appointmentDate < today) {
+    if (
+        appointmentDate < today &&
+        (!req.user || (req.user.role !== 'admin' && !req.user.isAdmin))
+    ) {
         return res.status(400).json({ message: 'Appointment date cannot be in the past.' });
     }
 
