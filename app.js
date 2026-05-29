@@ -66,18 +66,17 @@ app.use(`/api/v1/dashboard`, dashboardRouter);
 app.use(`/api/v1/documents`, documentsRouter);
 app.use(`/api/v1/report`, reportRouter);
 app.use(`/api/v1/medical`, medicalRouter);
-app.use(`/api/medical`, medicalRouter);
 app.use(`/api/v1/contact`, contactRouter);
 app.use("/api/v1/schedule", scheduleRouter);
 
 // Core base route
 app.get('/', (req, res) => {
-    res.send("Welcome to Binu's Dental Booking API");
+  res.send("Welcome to Binu's Dental Booking API");
 });
 
 // 3. Fallback for non-existent routes
 app.use('*', (req, res) => {
-    res.status(404).json({ message: 'API Route not found' });
+  res.status(404).json({ message: 'API Route not found' });
 });
 
 // 4. Global Error Handler (Must be placed AFTER all routes and middleware)
@@ -85,15 +84,15 @@ app.use(errorHandler);
 
 // Connect to database (runs on cold start for Vercel, on boot for local)
 connectToDatabase().catch((err) => {
-    console.error('Failed to connect to database:', err);
+  console.error('Failed to connect to database:', err);
 });
 
 // Local development: start the server. Vercel handles this automatically.
 if (!process.env.VERCEL) {
-    const PORT = process.env.PORT || 4500;
-    app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
-    });
+  const PORT = process.env.PORT || 4500;
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
 }
 
 export default app;
