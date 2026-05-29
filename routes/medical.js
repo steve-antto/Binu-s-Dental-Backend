@@ -222,16 +222,25 @@ medicalRouter.put(
     try {
       const appointment = await Appointment.findById(req.params.appointmentId);
 
+      if (!appointment) {
+        return res.status(404).json({
+          message: "Appointment not found",
+        });
+      }
+
       appointment.dentalChart = req.body;
 
       await appointment.save();
 
       res.json({
         success: true,
+        appointment,
       });
     } catch (error) {
+      console.error(error);
       res.status(500).json({
-        message: "Save failed",
+        success: false,
+        message: "Failed to save dental chart",
       });
     }
   }
