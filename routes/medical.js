@@ -251,6 +251,8 @@ medicalRouter.put(
   requireAdmin,
   async (req, res) => {
     try {
+      console.log("Dental chart body:", req.body);
+
       const appointment = await Appointment.findById(req.params.id);
 
       if (!appointment) {
@@ -271,15 +273,18 @@ medicalRouter.put(
 
       await appointment.save();
 
-      res.status(200).json({
+      const updated = await Appointment.findById(req.params.id);
+
+      res.json({
         success: true,
-        dentalChart: appointment.dentalChart,
+        dentalChart: updated.dentalChart,
       });
     } catch (error) {
-      console.error("Dental chart error:", error);
+      console.error("Dental save error:", error);
+
       res.status(500).json({
         success: false,
-        message: "Failed to save dental chart",
+        message: "Failed to save",
       });
     }
   }

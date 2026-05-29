@@ -35,12 +35,13 @@ const appointmentSchema = new mongoose.Schema({
             type: String,
             default: "LM",
         },
-        selectedTeeth: {
-            type: [String],
-            default: [],
-        },
+        selectedTeeth: [
+            {
+                type: String,
+            },
+        ],
         toothConditions: {
-            type: Object,
+            type: mongoose.Schema.Types.Mixed,
             default: {},
         }
     },
