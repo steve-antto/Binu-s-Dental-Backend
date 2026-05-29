@@ -66,6 +66,7 @@ app.use(`/api/v1/dashboard`, dashboardRouter);
 app.use(`/api/v1/documents`, documentsRouter);
 app.use(`/api/v1/report`, reportRouter);
 app.use(`/api/v1/medical`, medicalRouter);
+app.use(`/api/medical`, medicalRouter);
 app.use(`/api/v1/contact`, contactRouter);
 app.use("/api/v1/schedule", scheduleRouter);
 
