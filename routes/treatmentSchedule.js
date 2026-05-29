@@ -1,12 +1,13 @@
 import express from 'express';
 import { createTreatmentSchedule, getTreatmentSchedules } from '../controllers/treatmentSchedule.controller.js';
-import { verifyToken, restrictTo } from '../middleware/auth.middleware.js';
+import { authenticate } from '../middleware/auth.js';
+import { requireRoles } from '../middleware/roleauth.js';
 
 const router = express.Router();
 
-router.use(verifyToken);
+router.use(authenticate);
 
-router.post('/', restrictTo('admin', 'doctor'), createTreatmentSchedule);
-router.get('/', restrictTo('admin', 'doctor'), getTreatmentSchedules);
+router.post('/', requireRoles(['admin', 'doctor']), createTreatmentSchedule);
+router.get('/', requireRoles(['admin', 'doctor']), getTreatmentSchedules);
 
 export default router;
