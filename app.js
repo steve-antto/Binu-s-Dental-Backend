@@ -19,6 +19,7 @@ import documentsRouter from "./routes/documents.js";
 import reportRouter from "./routes/reports.js";
 import medicalRouter from "./routes/medical.js";
 import contactRouter from "./routes/contact.js";
+import scheduleRouter from "./routes/schedule.js";
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use(`/api/v1/documents`, documentsRouter);
 app.use(`/api/v1/report`, reportRouter);
 app.use(`/api/v1/medical`, medicalRouter);
 app.use(`/api/v1/contact`, contactRouter);
+app.use("/api/v1/schedule", scheduleRouter);
 
 // Core base route
 app.get('/', (req, res) => {

@@ -214,4 +214,43 @@ medicalRouter.delete("/scan/:id", authenticate, async (req, res) => {
   }
 });
 
+// ─── Admin: Save Dental Chart ───
+medicalRouter.put(
+  "/dental-chart/:appointmentId",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const appointment = await Appointment.findById(req.params.appointmentId);
+
+      if (!appointment) {
+        return res.status(404).json({
+          message: "Appointment not found",
+        });
+      }
+
+      appointment.dentalChart = {
+        gender: req.body.gender || "female",
+        bitewing: req.body.bitewing || false,
+        viewType: req.body.viewType || "LM",
+        selectedTeeth: req.body.selectedTeeth || [],
+        toothConditions: req.body.toothConditions || [],
+      };
+
+      await appointment.save();
+
+      res.json({
+        success: true,
+        message: "Dental chart saved",
+        dentalChart: appointment.dentalChart,
+      });
+    } catch (error) {
+      console.error("Dental Chart Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to save dental chart",
+      });
+    }
+  }
+);
+
 export default medicalRouter;

@@ -18,6 +18,27 @@ const appointmentSchema = new mongoose.Schema({
     photos: [{ filename: String, url: String, caption: { type: String, default: '' }, uploadedAt: { type: Date, default: Date.now } }],
     scans: [{ filename: String, url: String, uploadedAt: { type: Date, default: Date.now } }],
     reports: [{ filename: String, url: String, uploadedAt: { type: Date, default: Date.now } }],
+    dentalChart: {
+        gender: {
+            type: String,
+            default: "female"
+        },
+        bitewing: {
+            type: Boolean,
+            default: false
+        },
+        viewType: {
+            type: String,
+            default: "LM"
+        },
+        selectedTeeth: [{
+            type: String
+        }],
+        toothConditions: [{
+            tooth: String,
+            condition: String
+        }]
+    },
     invoiceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
     source: { type: String, enum: ['website', 'admin', 'walk-in'], default: 'admin' }
 }, { timestamps: true });

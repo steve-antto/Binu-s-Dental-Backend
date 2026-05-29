@@ -78,4 +78,26 @@ appointmentsRouter.delete('/:id', requireAdmin, async (req, res) => {
     }
 });
 
+appointmentsRouter.get(
+  "/by-date/:date",
+  authenticate,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const appointments = await Appointment.find({
+        appointmentDate: req.params.date,
+      }).populate("patientId");
+
+      res.json({
+        count: appointments.length,
+        appointments,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: err.message,
+      });
+    }
+  }
+);
+
 export default appointmentsRouter;
