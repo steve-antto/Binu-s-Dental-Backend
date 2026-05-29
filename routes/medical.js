@@ -214,38 +214,6 @@ medicalRouter.delete("/scan/:id", authenticate, async (req, res) => {
   }
 });
 
-// SAVE DENTAL CHART
-medicalRouter.put(
-  "/appointments/:id/dental-chart",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const appointment = await Appointment.findById(req.params.id);
-
-      if (!appointment) {
-        return res.status(404).json({
-          message: "Appointment not found",
-        });
-      }
-
-      appointment.dentalChart = req.body;
-
-      await appointment.save();
-
-      res.json({
-        success: true,
-        dentalChart: appointment.dentalChart,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        success: false,
-        message: "Dental chart save failed",
-      });
-    }
-  }
-);
-
 // ─── Admin: Get appointments by date ───
 medicalRouter.get(
   "/appointments/date/:date",
@@ -272,6 +240,46 @@ medicalRouter.get(
 
       res.status(500).json({
         message: "Error fetching appointments",
+      });
+    }
+  }
+);
+
+// SAVE DENTAL CHART
+medicalRouter.put(
+  "/appointments/:id/dental-chart",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const appointment = await Appointment.findById(req.params.id);
+
+      if (!appointment) {
+        return res.status(404).json({
+          success: false,
+          message: "Appointment not found",
+        });
+      }
+
+      appointment.dentalChart = {
+        gender: req.body.gender,
+        dentitionType: req.body.dentitionType,
+        bitewing: req.body.bitewing,
+        viewType: req.body.viewType,
+        selectedTeeth: req.body.selectedTeeth || [],
+        toothConditions: req.body.toothConditions || {},
+      };
+
+      await appointment.save();
+
+      res.status(200).json({
+        success: true,
+        dentalChart: appointment.dentalChart,
+      });
+    } catch (error) {
+      console.error("Dental chart error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to save dental chart",
       });
     }
   }
