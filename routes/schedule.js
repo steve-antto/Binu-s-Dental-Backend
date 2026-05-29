@@ -7,48 +7,49 @@ scheduleRouter.get("/slots/:date", async (req, res) => {
   try {
     const date = req.params.date;
 
-    const appointments =
-      await Appointment.find({
-        appointmentDate: date,
-        status: {
-          $ne: "Cancelled",
-        },
-      });
+    const appointments = await Appointment.find({
+      date,
+      status: {
+        $ne: "cancelled",
+      },
+    });
 
-    const bookedSlots =
-      appointments.map(a => a.time);
+    const bookedSlots = appointments.map((a) => a.time);
 
     const slots = [];
 
-    const startHour = 9;
-    const endHour = 18;
+    const generateSlots = (startHour, endHour) => {
+      for (let hour = startHour; hour <= endHour; hour++) {
+        for (let minute = 0; minute < 60; minute += 10) {
+          if (hour === endHour && minute > 0) break;
 
-    for (
-      let hour = startHour;
-      hour < endHour;
-      hour++
-    ) {
-      for (
-        let minute = 0;
-        minute < 60;
-        minute += 10
-      ) {
-        const time =
-          `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+          const dateObj = new Date();
+          dateObj.setHours(hour, minute, 0);
 
-        slots.push({
-          time,
-          booked:
-            bookedSlots.includes(time),
-        });
+          const formattedTime = dateObj.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          });
+
+          slots.push({
+            time: formattedTime,
+            booked: bookedSlots.includes(formattedTime),
+          });
+        }
       }
-    }
+    };
+
+    // Morning
+    generateSlots(9, 13);
+
+    // Evening
+    generateSlots(17, 20);
 
     res.json(slots);
-
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({
-      message: err.message,
+      message: "Error fetching slots",
     });
   }
 });
