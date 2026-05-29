@@ -214,13 +214,13 @@ medicalRouter.delete("/scan/:id", authenticate, async (req, res) => {
   }
 });
 
-// ─── Admin: Save Dental Chart ───
+// SAVE DENTAL CHART
 medicalRouter.put(
-  "/dental-chart/:appointmentId",
+  "/appointments/:id/dental-chart",
   requireAdmin,
   async (req, res) => {
     try {
-      const appointment = await Appointment.findById(req.params.appointmentId);
+      const appointment = await Appointment.findById(req.params.id);
 
       if (!appointment) {
         return res.status(404).json({
@@ -234,13 +234,13 @@ medicalRouter.put(
 
       res.json({
         success: true,
-        appointment,
+        dentalChart: appointment.dentalChart,
       });
     } catch (error) {
       console.error(error);
       res.status(500).json({
         success: false,
-        message: "Failed to save dental chart",
+        message: "Dental chart save failed",
       });
     }
   }
