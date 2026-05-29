@@ -223,7 +223,10 @@ medicalRouter.get(
       const selectedDate = req.params.date;
 
       const appointments = await Appointment.find({
-        date: selectedDate,
+        date: {
+          $regex: selectedDate,
+          $options: "i",
+        },
       })
         .sort({
           time: 1,
